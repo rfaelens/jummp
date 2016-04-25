@@ -234,24 +234,47 @@ class SearchService {
         }
         Authentication auth = springSecurityService.authentication
         AtomicReference<Authentication> authRef = new AtomicReference<>(auth)
-        Promise p = Revision.async.task {
+        Promise indexer = Revision.async.task {
             SecurityContextHolder.context.authentication = authRef.get()
-            revisions.each {
-                try {
-                    updateIndex(it)
-                }
-                catch(Exception e) {
-                    log.error("Exception thrown while indexing ${it.properties} ${e.getMessage()}", e)
-                }
+            revisions.each { Revision r ->
+                processRevision(r)
             }
         }
-        p.onComplete {
+        indexer.onComplete {
             if (IS_INFO_ENABLED) {
                 log.info "Finished regenerating the index."
             }
         }
-        p.onError { Throwable e ->
+        indexer.onError { Throwable e ->
             log.error("Error regenerating the index: ${e.message}", e)
+        }
+    }
+
+    private void processRevision(Revision r) {
+        def canAttachDebugger = grailsApplication.config.jummp.search.index.attachDebugger
+        canAttachDebugger ? indexRevision(r) : indexRevisionAsync(r)
+    }
+
+    private void indexRevision(Revision r) {
+        try {
+            updateIndex r
+        } catch(Exception e) {
+            log.error("Error indexing revision ${r.id} -- ${e.message}".toString(), e)
+        }
+    }
+
+    private void indexRevisionAsync(Revision r) {
+        Promise thisPromise  = Promises.task {
+            if (IS_DEBUG_ENABLED) {
+                log.debug "Begin scheduling the indexing of revision ${revision.id}"
+            }
+            updateIndex r
+        }.onComplete {
+            if (IS_DEBUG_ENABLED) {
+                log.debug "Finished indexing revision ${r.id}"
+            }
+        }.onError { Throwable t ->
+            log.error("Error while indexing revision ${r.properties} -- ${t.message}", t)
         }
     }
 
