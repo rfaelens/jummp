@@ -2254,6 +2254,9 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         }
         // grant read access and administrative privilege to future curators
         aclUtilService.addPermission(revision, "ROLE_CURATOR", BasePermission.ADMINISTRATION)
+        aclUtilService.addPermission(revision, "ROLE_CURATOR", BasePermission.READ)
+        revision.state = ModelState.UNDER_CURATION
+        revision.save(flush: true)
     }
 
     /**
