@@ -84,7 +84,18 @@
                             </g:else>
                         </tbody>
                     </table>
+                    <div id="additionalFilesOnUI" name="additionalFilesOnUI" style="display: none">
+                        <g:if test="${workingMemory['additional_repository_files_in_working']}">
+                            <jummp:populateExistingAdditionalFilesOnUI
+                                additionalsOnUI = "${workingMemory['additional_repository_files_in_working']}"/>
+                        </g:if>
+                        <g:else>
+                            <jummp:populateExistingAdditionalFilesOnUI
+                                additionalsOnUI = "${workingMemory['additional_files']}"/>
+                        </g:else>
+                    </div>
                     <div id="noAdditionals"></div>
+                    <div id="additionalsOnUI"></div>
                 </fieldset>
                 <div class="buttons">
                     <g:submitButton name="Cancel" value="${g.message(code: 'submission.common.cancelButton')}" />
