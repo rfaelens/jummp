@@ -113,7 +113,36 @@
             </div>
         </g:uploadForm>
         <g:javascript>
+            var nbExtraFiles = 0;
+            var numberOfAdditionalsAtLoadingPage = $('input[id^=description]').size();
+            // create a map to store additional files existing on user interface
+            var additionalFilesExitingOnUI = new Object();
+            function populateDiv() {
+                document.getElementById("additionalFilesOnUI").innerHTML = "";
+                var str = "";
+                $.each(additionalFilesExitingOnUI, function(key, value) {
+                    str += key.replace(":","").trim() + " : " + value.trim() + ", ";
+                });
+                var str = str.substring(0,str.length - 2);
+                document.getElementById("additionalFilesOnUI").innerHTML += str;
+                document.getElementById("additionalsOnUI").innerHTML = "<input value='" +
+                document.getElementById("additionalFilesOnUI").innerHTML + "' name='additionalFilesInWorking' hidden/>";
+            }
+
+            function get(k) {
+                return additionalFilesExitingOnUI[k];
+            }
+
             $(document).ready(function () {
+                var additionals = $.trim(document.getElementById("additionalFilesOnUI").innerHTML);
+                console.log(additionals);
+                additionals.slice(0,-1);
+                var arr = additionals.split(", ");
+                $.each(arr, function(k,v) {
+                    var row = $.trim(v).split(":");
+                    additionalFilesExitingOnUI[row[0].replace(":","").trim()] = row[1].trim();
+                });
+
                 $('.removeMain').click(function(e) {
                     e.preventDefault();
                     var parent = $(this).parent().get(0).innerHTML;
@@ -140,16 +169,6 @@
                     var newValue = this.value;
                     var newName = trimElementName("\\", newValue);
                     document.getElementById(id).innerHTML = newName;
-                });
-                $(document).on("click", 'a.killer', function (e) {
-                    e.preventDefault();
-                    var tr = $(this).parent().parent().get(0);
-                    var td = tr.getElementsByClassName("name")[0];
-                    if (td) {
-                        var hi = "<input type='hidden' value='" + td.innerHTML + "' name='deletedAdditional'/>";
-                        document.getElementById("noAdditionals").innerHTML += hi;
-                    }
-                    $(tr).empty();
                 });
 
                 $("#addFile").click(function (evt) {
@@ -184,6 +203,11 @@
                     ).appendTo('table#additionalFiles');
                 });
 
+                $("#_eventId_Upload").click(function() {
+                    document.getElementById("additionalsOnUI").innerHTML = "<input value='" +
+                    document.getElementById("additionalFilesOnUI").innerHTML + "' name='additionalFilesInWorking' hidden/>";
+                });
+
                 $("#uploadButton").click( function() {
                     $("#fileUpload").submit();
                 });
@@ -192,6 +216,70 @@
                     $("#fileUpload").reset();
                 });
             });
+
+            $(document).on("click", 'a.killer', function (e) {
+                e.preventDefault();
+                var tr = $(this).parent().parent().get(0);
+                var td = tr.getElementsByClassName("name")[0];
+                if (td) {
+                    // collect the additional files existing we want to delete
+                    var hi = "<input type='hidden' value='" + td.innerHTML + "' name='deletedAdditional'/>";
+                    document.getElementById("noAdditionals").innerHTML += hi;
+
+                    // update the map
+                    var fileName = td.innerHTML.substring(0,td.innerHTML.indexOf("<"));
+                    if (fileName == '') { // this file has just added in extraFiles division
+                        var id = $(this).attr('id');
+                        var idFileUpload = id.substr('discard'.length);
+                        fileNameAbsolutePath = $("#"+idFileUpload).val();
+                        // 12 = ('C:\fakepath\').length
+                        fileName = fileNameAbsolutePath.substr(12);
+                    }
+                    delete additionalFilesExitingOnUI[fileName];
+                    populateDiv();
+                }
+                $(tr).empty();
+            });
+
+            $(document).on("change", 'input[type=file]', function (e) {
+                var fileName = $(this)[0].files[0].name;
+                if (additionalFilesExitingOnUI[fileName]) {
+                    alert("Selected file with the name: " + fileName + " existing. Please rename it or select another file.");
+                } else {
+                    additionalFilesExitingOnUI[fileName] = "no description";
+                    $(this).attr('value', fileName);
+                    var discardID = "discard" + $(this).attr('id');
+                    $("#"+discardID).attr('download', fileName);
+                    populateDiv();
+                }
+            });
+
+            $(document).on("change", "input[id^=description]", function() {
+                // get the id of the current input tag, then get its counter for the next step
+                // because each of the additional files is displayed in table row
+                var tr = $(this).parent().parent().get(0);
+                // the table has three columns. The file name of the additional file is in the first cell
+                var td = tr.getElementsByClassName("name")[0];
+                if (td) {
+                    var hi = td.innerHTML;
+                    // update Files Existing on UI
+                    // there is an input tag set hidden to store RFTC object. We need only the file name.
+                    var posLessThan = hi.indexOf("<");
+                    if (posLessThan > 0) {
+                        // this case is the existing file on database
+                        fileName = hi.substring(0,posLessThan);
+                    } else {
+                        // this case is the file just added by clicking "Add an additional file"
+                        var tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = hi;
+                        var elements = tempDiv.childNodes;
+                        fileName = elements[0].getAttribute("value");
+                    }
+                    additionalFilesExitingOnUI[fileName] = $(this).val();
+                }
+                populateDiv();
+            });
+
             $( "#dialog-confirm" ).dialog({
                         resizable: false,
                         height:300,
