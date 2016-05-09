@@ -121,7 +121,7 @@
                     var start = "<span id='mainName_".length;
                     var end = trimmedParent.indexOf("\">", start);
                     var name = trimmedParent.substring(start, end);
-                    var hi = "<input type='hidden' value='" + name + "' name='deletedMain'/>";
+                    var hi = "<input value='" + name + "' name='deletedMain' hidden>";
                     document.getElementById("noMains").innerHTML += hi;
                     $(this).parent().get(0).innerHTML = "<input type='file' id='mainFile' name='mainFile' class='mainFile' ></input>\n\t</td>\n</tr>";
 
