@@ -74,7 +74,14 @@
                     <a href="#" id="addFile"><jummp:renderAdditionalFilesAddButton/></a>
                     <table class='formtable' id="additionalFiles">
                         <tbody>
-                            <jummp:displayExistingAdditionalFiles additionals = "${workingMemory['additional_files']}"/>
+                            <g:if test="${workingMemory['additional_repository_files_in_working']}">
+                                <jummp:displayExistingAdditionalFiles
+                                    additionals = "${workingMemory['additional_repository_files_in_working']}"/>
+                            </g:if>
+                            <g:else>
+                                <jummp:displayExistingAdditionalFiles
+                                    additionals = "${workingMemory['additional_files']}"/>
+                            </g:else>
                         </tbody>
                     </table>
                     <div id="noAdditionals"></div>
