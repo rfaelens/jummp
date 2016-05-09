@@ -210,7 +210,7 @@
              *
              * This method does not change the original string. If it contains the supplied
              * separator, this method will return a new string that starts from the character
-             * that follows the last occurance of the separator. Otherwise, the string is returned
+             * that follows the last occurrence of the separator. Otherwise, the string is returned
              * as-is.
              * @param sep The character that marks the end of the prefix to be removed.
              * @param elemName The string that should be trimmed
