@@ -123,13 +123,15 @@
                     var name = trimmedParent.substring(start, end);
                     var hi = "<input value='" + name + "' name='deletedMain' hidden>";
                     document.getElementById("noMains").innerHTML += hi;
-                    $(this).parent().get(0).innerHTML = "<input type='file' id='mainFile' name='mainFile' class='mainFile' ></input>\n\t</td>\n</tr>";
+                    $(this).parent().get(0).innerHTML = "<input type='file' id='mainFile' name='mainFile' class='mainFile' >\n\t</td>\n</tr>";
 
                 });
+
                 $('.replaceMain').click(function(e) {
                     e.preventDefault();
                     $(this).parent().get(0).getElementsByTagName("input")[0].click();
                 });
+
                 $('.mainFile').change(function(click) {
                     var oldName = $(this).data("labelname");
                     var hi = "<input type='hidden' value='" + oldName + "' name='deletedMain'/>";
