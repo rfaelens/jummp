@@ -32,14 +32,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
         <title><g:message code="submission.upload.header"/></title>
-        <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness" file="jquery-ui-1.10.3.custom.css"/>" />
-        <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
+        <g:javascript contextPath="" src="jquery/jquery-ui-v1.10.3.js"/>
         <g:if test ="${showProceedWithoutValidationDialog || showProceedAsUnknownFormat}">
-          <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-      </g:if>
+            <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+        </g:if>
     </head>
     <body>
-    	<g:if test="${showProceedAsUnknownFormat}">
+        <g:if test="${showProceedAsUnknownFormat}">
           <div id="dialog-confirm" title="Model Format Error">
             <p>The model was detected as ${modelFormatDetectedAs} but is not a
             supported version. You can proceed with the submission but the model
