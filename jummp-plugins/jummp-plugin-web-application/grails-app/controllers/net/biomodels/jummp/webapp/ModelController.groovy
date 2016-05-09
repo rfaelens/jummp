@@ -552,69 +552,73 @@ class ModelController {
         }
         uploadFiles {
             on("Upload") {
-            	try {
-                def mainMultipartList = request.getMultiFileMap().mainFile
-                def extraFileField = request.getMultiFileMap().extraFiles
-                List<MultipartFile> extraMultipartList = []
-                if (extraFileField instanceof MultipartFile) {
-                    extraMultipartList = [extraFileField]
-                }
-                else {
-                    extraMultipartList = extraFileField
-                }
-                def descriptionFields = params?.description ?: [""]
-                if (descriptionFields instanceof String) {
-                    descriptionFields = [descriptionFields]
-                }
-                def noMains = params.deletedMain
-                List<String> mainsToBeDeleted = []
-                if (noMains) {
-                    if (!(noMains instanceof CharSequence)) {
-                        mainsToBeDeleted.addAll(Arrays.asList(noMains))
-                    } else {
-                        mainsToBeDeleted.add(noMains)
+                // get the main and the additional files just added and their descriptions
+                // these operations are based on params
+                // the principal purpose of this step is to store an UploadCommand object to workingMemory
+                // this object persists the latest changes on the upload file page
+                try {
+                    def mainMultipartList = request.getMultiFileMap().mainFile
+                    def extraFileField = request.getMultiFileMap().extraFiles
+                    List<MultipartFile> extraMultipartList = []
+                    if (extraFileField instanceof MultipartFile) {
+                        extraMultipartList = [extraFileField]
                     }
-                }
-                def noAdditionals = params.deletedAdditional
-                List<String> additionalsToBeDeleted = []
-                if (noAdditionals) {
-                    if (noAdditionals.getClass().isArray()) {
-                        additionalsToBeDeleted.addAll(Arrays.asList(noAdditionals))
-                    } else {
-                        additionalsToBeDeleted.add(noAdditionals)
+                    else {
+                        extraMultipartList = extraFileField
                     }
-                }
-                if (IS_DEBUG_ENABLED) {
-                    if (mainMultipartList?.size() == 1) {
-                        log.debug("""\
-New submission started.The main file supplied is ${mainMultipartList.properties}.""")
-                    } else {
-                        log.debug("""\
-New submission started. Main files: ${mainMultipartList.inspect()}.""")
+                    def descriptionFields = params?.description ?: [""]
+                    if (descriptionFields instanceof String) {
+                        descriptionFields = [descriptionFields]
                     }
-                    log.debug("Additional files supplied: ${extraMultipartList.inspect()}.\n")
-                }
+                    def noMains = params.deletedMain
+                    List<String> mainsToBeDeleted = []
+                    if (noMains) {
+                        if (!(noMains instanceof CharSequence)) {
+                            mainsToBeDeleted.addAll(Arrays.asList(noMains))
+                        } else {
+                            mainsToBeDeleted.add(noMains)
+                        }
+                    }
+                    def noAdditionals = params.deletedAdditional
+                    List<String> additionalsToBeDeleted = []
+                    if (noAdditionals) {
+                        if (noAdditionals.getClass().isArray()) {
+                            additionalsToBeDeleted.addAll(Arrays.asList(noAdditionals))
+                        } else {
+                            additionalsToBeDeleted.add(noAdditionals)
+                        }
+                    }
+                    if (IS_DEBUG_ENABLED) {
+                        if (mainMultipartList?.size() == 1) {
+                            log.debug("""\
+    New submission started.The main file supplied is ${mainMultipartList.properties}.""")
+                        } else {
+                            log.debug("""\
+    New submission started. Main files: ${mainMultipartList.inspect()}.""")
+                        }
+                        log.debug("Additional files supplied: ${extraMultipartList.inspect()}.\n")
+                    }
 
-                def cmd = new UploadFilesCommand()
-                cmd.mainFile = mainMultipartList
-                cmd.extraFiles = extraMultipartList
-                cmd.mainDeletes = mainsToBeDeleted
-                cmd.extraDeletes = additionalsToBeDeleted
-                cmd.description = descriptionFields
-                if (IS_DEBUG_ENABLED) {
-                    log.debug "Data binding done :${cmd.properties}"
-                }
-                flow.workingMemory.put("UploadCommand", cmd)
+                    def cmd = new UploadFilesCommand()
+                    cmd.mainFile = mainMultipartList
+                    cmd.extraFiles = extraMultipartList
+                    cmd.mainDeletes = mainsToBeDeleted
+                    cmd.extraDeletes = additionalsToBeDeleted
+                    cmd.description = descriptionFields
+                    if (IS_DEBUG_ENABLED) {
+                        log.debug "Data binding done :${cmd.properties}"
+                    }
+                    flow.workingMemory.put("UploadCommand", cmd)
                 }
                 catch(Exception e) {
-                	e.printStackTrace();
+                    e.printStackTrace();
                 }
             }.to "transferFilesToService"
             on("ProceedWithoutValidation"){
 
             }.to "inferModelInfo"
             on("ProceedAsUnknown"){
-            	flow.workingMemory.get("model_type").identifier = "UNKNOWN"
+                flow.workingMemory.get("model_type").identifier = "UNKNOWN"
             }.to "inferModelInfo"
             on("Cancel").to "cleanUpAndTerminate"
             on("Back"){}.to "displayDisclaimer"
