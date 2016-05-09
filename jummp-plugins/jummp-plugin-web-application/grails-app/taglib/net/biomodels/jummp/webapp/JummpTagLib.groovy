@@ -87,6 +87,22 @@ class JummpTagLib {
         }
     }
 
+    def populateExistingAdditionalFilesOnUI = { attrs ->
+        if (!attrs.additionalsOnUI) {
+            return
+        }
+        StringBuilder result = new StringBuilder()
+        attrs.additionalsOnUI.each { f ->
+            RepositoryFileTransportCommand command = f as RepositoryFileTransportCommand
+            String name = new File(command.path).name
+            result.append(name).append(" : ").append(command.description).append(", ")
+        }
+        if (result.length() > 0) {
+            result.setLength(result.length() - 2)
+        }
+        out << result.toString()
+    }
+
     def renderAdditionalFilesLegend = {
         String additionalFilesLegend = "submission.upload.additionalFiles.legend"
         if (isDDMoReDeployment()) {
