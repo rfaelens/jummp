@@ -157,26 +157,30 @@
                     $('<tr>', {
                         class: 'fileEntry'
                     }).append(
-                        $('<td>').append(
-                            $('<input>', {
+                        $('<td class="name">').append(
+                            $('<input/>', {
                                 type: 'file',
-                                name: "extraFiles",
+                                id: 'extraFiles' + nbExtraFiles,
+                                name: 'extraFiles'
                             })
                         ),
-                        $('<td>').append(
-                            $('<input>', {
+                        $('</td><td style="width: 285px">').append(
+                            $('<input/>', {
                                 type: 'text',
-                                name: "description",
-                                placeholder: "Please enter a description"
+                                id: 'description' + ++numberOfAdditionalsAtLoadingPage,
+                                name: 'description' + numberOfAdditionalsAtLoadingPage,
+                                style: "width: 100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;",
+                                placeholder: 'Please enter a description'
                             })
                         ),
-                        $('<td>').append(
+                        $('</td><td>&nbsp;').append(
                             $('<a>', {
                                 href: "#",
                                 class: 'killer',
-                                text: 'Discard'
+                                text: 'Discard',
+                                id: 'discardextraFiles' + nbExtraFiles++
                             })
-                        )
+                        ).append("</a>")
                     ).appendTo('table#additionalFiles');
                 });
 
