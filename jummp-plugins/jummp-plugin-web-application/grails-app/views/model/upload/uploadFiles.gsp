@@ -12,8 +12,8 @@
  Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
- 
- You should have received a copy of the GNU Affero General Public License along 
+
+ You should have received a copy of the GNU Affero General Public License along
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
@@ -247,15 +247,18 @@
             });
 
             $(document).on("change", 'input[type=file]', function (e) {
-                var fileName = $(this)[0].files[0].name;
-                if (additionalFilesExitingOnUI[fileName]) {
-                    alert("Selected file with the name: " + fileName + " existing. Please rename it or select another file.");
-                } else {
-                    additionalFilesExitingOnUI[fileName] = "no description";
-                    $(this).attr('value', fileName);
-                    var discardID = "discard" + $(this).attr('id');
-                    $("#"+discardID).attr('download', fileName);
-                    populateDiv();
+                var id = $(this).attr('id');
+                if (id != 'mainFile') {
+                    var fileName = $(this)[0].files[0].name;
+                    if (additionalFilesExitingOnUI[fileName]) {
+                        alert("The file named " + fileName + " already exists. Please rename it or select another file.");
+                    } else {
+                        additionalFilesExitingOnUI[fileName] = "no description";
+                        $(this).attr('value', fileName);
+                        var discardID = "discard" + $(this).attr('id');
+                        $("#"+discardID).attr('download', fileName);
+                        populateDiv();
+                    }
                 }
             });
 
