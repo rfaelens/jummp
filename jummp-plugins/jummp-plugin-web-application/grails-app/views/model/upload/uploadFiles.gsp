@@ -89,9 +89,12 @@
                             <jummp:populateExistingAdditionalFilesOnUI
                                 additionalsOnUI = "${workingMemory['additional_repository_files_in_working']}"/>
                         </g:if>
-                        <g:else>
+                        <g:elseif test="${workingMemory['additional_files']}">
                             <jummp:populateExistingAdditionalFilesOnUI
                                 additionalsOnUI = "${workingMemory['additional_files']}"/>
+                        </g:elseif>
+                        <g:else>
+                            empty
                         </g:else>
                     </div>
                     <div id="noAdditionals"></div>
@@ -134,14 +137,16 @@
             }
 
             $(document).ready(function () {
-                var additionals = $.trim(document.getElementById("additionalFilesOnUI").innerHTML);
-                console.log(additionals);
-                additionals.slice(0,-1);
-                var arr = additionals.split(", ");
-                $.each(arr, function(k,v) {
-                    var row = $.trim(v).split(":");
-                    additionalFilesExitingOnUI[row[0].replace(":","").trim()] = row[1].trim();
-                });
+                var additionals = document.getElementById("additionalFilesOnUI").innerHTML;
+                additionals = additionals.trim();
+                if (additionals != 'empty') {
+                    additionals.slice(0,-1);
+                    var arr = additionals.split(", ");
+                    $.each(arr, function(k,v) {
+                        var row = $.trim(v).split(":");
+                        additionalFilesExitingOnUI[row[0].replace(":","").trim()] = row[1].trim();
+                    });
+                }
 
                 $('.removeMain').click(function(e) {
                     e.preventDefault();
