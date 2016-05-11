@@ -79,7 +79,7 @@ class JummpTagLib {
             out << "<input style='display:none' type='file' id='additionalFilesExisting' " +
                    "name='additionalFilesExisting' value='${name}'></td>\n\t"
             out << "<td style='width: 285px'>" +
-                   "<input name='description${counter}' id='description${counter}' type='text' value='${command.description}' " +
+                   "<input name='description${counter}' id='description${counter}' type='text' value='${command.description ?: ""}' " +
                    "style='width: 100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'></td>\n\t"
             out << "<td><a href='#' class='killer' title='Discard file'>Discard</a></td>\n"
             out << "</tr>\n"
@@ -95,7 +95,7 @@ class JummpTagLib {
         attrs.additionalsOnUI.each { f ->
             RepositoryFileTransportCommand command = f as RepositoryFileTransportCommand
             String name = new File(command.path).name
-            result.append(name).append(" : ").append(command.description).append(", ")
+            result.append(name).append(" : ").append(command.description ?: "").append(", ")
         }
         if (result.length() > 0) {
             result.setLength(result.length() - 2)
