@@ -253,7 +253,7 @@
                     if (additionalFilesExitingOnUI[fileName]) {
                         alert("The file named " + fileName + " already exists. Please rename it or select another file.");
                     } else {
-                        additionalFilesExitingOnUI[fileName] = "no description";
+                        additionalFilesExitingOnUI[fileName] = "";
                         $(this).attr('value', fileName);
                         var discardID = "discard" + $(this).attr('id');
                         $("#"+discardID).attr('download', fileName);
