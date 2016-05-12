@@ -67,6 +67,9 @@
     <div id="message"></div>
     <div id="report"></div>
     <h1>Annotate Model ${revision.name} (${revision.model.publicationId ?: revision.model.submissionId})</h1>
+    <div>
+        <g:message code="annotationEditor.info.ddmore" args="${[revision.model.submissionId]}"/>
+    </div>
     <div id="toolbar" class="ui-corner-all">
         <button id="saveButton" title="Save model properties" class="action">Save</button>
         <button id="validateButton" title="Validate model properties" class="action">Validate</button>
