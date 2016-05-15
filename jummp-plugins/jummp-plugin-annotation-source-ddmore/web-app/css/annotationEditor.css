@@ -51,8 +51,6 @@
     color: blue;
 }
 .info {
-    padding: 0.2em;
-    margin-top: 0.4em;
 }
 
 .infoLabel {
@@ -65,8 +63,16 @@
     padding:0.75em 0;
 }
 
+.info {
+    margin-top: 0.5em;
+}
+
 .info p {
     margin: 0px;
+}
+
+.info div.indented {
+    margin-left: 1.8em;
 }
 
 .inlineLabel {
