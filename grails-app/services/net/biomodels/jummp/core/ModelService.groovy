@@ -2200,7 +2200,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         }
 
         if(!pubInfo.validModelAccomodation()){
-            throw new PublishException("Model is not compliance with original publication. Please provide a Model_Accommodations.txt file.")
+            throw new PublishException("Model is not compliant with original publication. Please provide a Model_Accommodations.txt file.")
         }
 
         def scenario = publishValidator.validatePublish(pubInfo)
