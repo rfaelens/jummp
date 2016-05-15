@@ -63,7 +63,7 @@
     /* body { max-width: 1600px; margin: 0 auto; } */
       body {
           margin: 0 auto;
-          overflow-x: hidden;
+          /*overflow-x: hidden;*/
           overflow-y: auto;
       }
   </style>
