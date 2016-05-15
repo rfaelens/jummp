@@ -78,3 +78,13 @@
 .inlineLabel {
     display: inline;
 }
+
+.clearRadioGroup {
+    background: white;
+    color: rgb(22, 151, 200);
+    border: 1px solid blue;
+    padding: 0.1em 0.8em;
+    cursor: pointer;
+    margin-left: 8em;
+}
+

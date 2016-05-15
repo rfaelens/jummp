@@ -20,11 +20,12 @@
         <div>your multiple input fields go here</div>
     </script>
     <script id="single-constrained-value-template" type="text/x-handlebars-template">
-        <form>
+        <span>
         {{#each this.items}}
             <input type="radio" value="{{value}}" name="{{getNameForRadioButton this}}" id="{{getRadioButtonId this @index}}" {{#isSelected}}checked='checked'{{/isSelected}}/><label class="inlineLabel" for="{{getRadioButtonId this @index}}">{{value}}</label>
         {{/each}}
-        </form>
+        <a class="clearRadioGroup" title="Resets the value for this field">Clear</a>
+        </span>
     </script>
     <script id="multiple-constrained-value-template" type="text/x-handlebars-template">
         {{renderMultipleConstrainedValues}}
