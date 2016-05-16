@@ -380,8 +380,8 @@
             $('#confirm-model-notify').dialog({
                 resizable: false,
                 autoOpen: false,
-                height: 250,
-                width: 500,
+                height: 200,
+                width: 525,
                 modal: true,
                 buttons: {
                     Confirm: function() {
@@ -536,18 +536,10 @@
                 </g:if>
                 <g:if test="${canUpdate}">
                     <li>
-                    <g:if test="${haveAnnotations}">
                         <button class='toolbutton' id='annotate'
                                 onclick="return $.jummp.openPage('${g.createLink(controller: 'annotation',
                                 action: 'edit',
                                 id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Annotate</button>
-                    </g:if>
-                    <g:else>
-                        <button class='toolbutton' id='annotate'
-                                onclick="return $.jummp.openPage('${g.createLink(controller: 'annotation',
-                                action: 'show',
-                                id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Annotate</button>
-                    </g:else>
                     </li>
                 </g:if>
                 </ul>

@@ -1803,7 +1803,11 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     private boolean hasAdminPermission(def modelOrRevision, String username) {
         Acl acl = aclUtilService.readAcl(modelOrRevision)
         return null != acl.entries.find { ace ->
-            ace.sid.principal == username &&
+            if (!(ace instanceof PrincipalSid)) {
+                return
+            }
+            def aceAsPrincipalSid = ace.sid as PrincipalSid
+            aceAsPrincipalSid.principal == username &&
                     ace.permission == BasePermission.ADMINISTRATION
         }
     }
@@ -2103,8 +2107,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         if (revision.model.deleted) {
             return false
         }
-        if ((SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || SpringSecurityUtils.ifAnyGranted("ROLE_USER")) &&
-            (!SpringSecurityUtils.ifAnyGranted("ROLE_CURATOR"))) {
+        if (!SpringSecurityUtils.ifAnyGranted("ROLE_CURATOR")) {
             return true
         }
         return false
@@ -2272,6 +2275,9 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         }
         // grant read access and administrative privilege to future curators
         aclUtilService.addPermission(revision, "ROLE_CURATOR", BasePermission.ADMINISTRATION)
+        aclUtilService.addPermission(revision, "ROLE_CURATOR", BasePermission.READ)
+        revision.state = ModelState.UNDER_CURATION
+        revision.save(flush: true)
     }
 
     /**

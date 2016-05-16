@@ -21,6 +21,7 @@
 package net.biomodels.jummp.core
 
 import eu.ddmore.metadata.service.ValidationException
+import grails.async.Promises
 import net.biomodels.jummp.annotationstore.ResourceReference
 import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.annotation.QualifierTransportCommand
@@ -31,6 +32,8 @@ import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.annotation.SectionContainer
 import net.biomodels.jummp.model.Revision
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
 
 /**
@@ -45,7 +48,10 @@ import org.perf4j.aop.Profiled
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class MetadataDelegateService implements IMetadataService {
+    private final Log log = LogFactory.getLog(getClass())
+    private final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
     static transactional = false
+
     /**
      * Dependency injection for the metadata service.
      */
@@ -121,7 +127,16 @@ class MetadataDelegateService implements IMetadataService {
 
     @Profiled(tag = "metadataDelegateService.persistAnnotationSchema")
     boolean persistAnnotationSchema(Collection<SectionContainer> sections) {
-        metadataService.persistAnnotationSchema(sections)
+        if (IS_DEBUG_ENABLED) {
+            log.debug "Begin persisting annotation schema..."
+        }
+        Promises.task {
+            metadataService.persistAnnotationSchema(sections)
+        }.onComplete {
+            if (IS_DEBUG_ENABLED) {
+                log.debug "...done persisting annotation schema"
+            }
+        }
     }
 
     @Profiled(tag = "metadataDelegateService.validateModelRevision")
@@ -133,16 +148,10 @@ class MetadataDelegateService implements IMetadataService {
         }
     }
 
-    @Profiled(tag = "metadataDelegateService.updateMetadata")
-    boolean updateMetadata(String model, List<StatementTransportCommand> statements) {
-        metadataService.saveMetadata(model, statements, true)
-    }
-
     @Profiled(tag = "metadataDelegateService.getMetadataNamespaces")
     List<String> getMetadataNamespaces() {
         metadataService.getMetadataNamespaces()
     }
-
 
     Map<QualifierTransportCommand, List<ResourceReferenceTransportCommand>> fetchGenericAnnotations(
         RevisionTransportCommand rev) {
