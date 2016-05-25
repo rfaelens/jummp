@@ -27,7 +27,7 @@
 
 
 
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="net.biomodels.jummp.core.model.RepositoryFileTransportCommand; grails.converters.JSON" contentType="text/html;charset=UTF-8" %>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
@@ -36,6 +36,16 @@
         <g:if test ="${showProceedWithoutValidationDialog || showProceedAsUnknownFormat}">
             <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
         </g:if>
+        <script type="text/javascript">
+            var descriptionMap = { "files": ${workingMemory['additional_files'].collect {
+                            RepositoryFileTransportCommand rf ->
+                                String key = new File(rf.path).name
+                                String value = rf.description
+                                [ filename: key, description: value ]
+                        } as JSON}
+            };
+            var existingAdditionalFiles = descriptionMap["files"];
+        </script>
     </head>
     <body>
         <g:if test="${showProceedAsUnknownFormat}">
