@@ -179,7 +179,7 @@
                             $('<input/>', {
                                 type: 'text',
                                 id: 'description' + ++numberOfAdditionalsAtLoadingPage,
-                                name: 'description' + numberOfAdditionalsAtLoadingPage,
+                                name: 'description',
                                 style: "width: 100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;",
                                 placeholder: 'Please enter a description'
                             })
@@ -330,4 +330,3 @@
     </body>
    <g:render template="/templates/decorateSubmission" />
    <g:render template="/templates/subFlowContextHelp" />
-
