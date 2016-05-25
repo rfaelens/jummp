@@ -118,36 +118,23 @@
         <g:javascript>
             var nbExtraFiles = 0;
             var numberOfAdditionalsAtLoadingPage = $('input[id^=description]').size();
-            // create a map to store additional files existing on user interface
-            var additionalFilesExitingOnUI = new Object();
             function populateDiv() {
-                document.getElementById("additionalFilesOnUI").innerHTML = "";
-                var str = "";
-                $.each(additionalFilesExitingOnUI, function(key, value) {
-                    str += key.replace(":","").trim() + " : " + value.trim() + ", ";
+                descriptionMap.files = []
+                $.each(existingAdditionalFiles, function(index, fileEntry) {
+                    // key here is the index, value is the actual value we are interested in
+                    var fileName = fileEntry["filename"];
+                    var fileDescription  = fileEntry["description"];
+                    descriptionMap.files.push({'filename': fileName, 'description': fileDescription});
                 });
-                var str = str.substring(0,str.length - 2);
-                document.getElementById("additionalFilesOnUI").innerHTML += str;
-                document.getElementById("additionalsOnUI").innerHTML = "<input value='" +
-                document.getElementById("additionalFilesOnUI").innerHTML + "' name='additionalFilesInWorking' hidden/>";
-            }
-
-            function get(k) {
-                return additionalFilesExitingOnUI[k];
+                // update the hidden input element containing the latest additional files
+                // the map should be converted to json string that will be transfered to controller
+                var input = "<input name='additionalFilesInWorking' size='220' value='";
+                    input += JSON.stringify(descriptionMap) + "'/>";
+                document.getElementById("additionalsOnUI").innerHTML = input;
             }
 
             $(document).ready(function () {
-                var additionals = document.getElementById("additionalFilesOnUI").innerHTML;
-                additionals = additionals.trim();
-                if (additionals != 'empty') {
-                    additionals.slice(0,-1);
-                    var arr = additionals.split(", ");
-                    $.each(arr, function(k,v) {
-                        var row = $.trim(v).split(":");
-                        additionalFilesExitingOnUI[row[0].replace(":","").trim()] = row[1].trim();
-                    });
-                }
-
+                populateDiv();
                 $('.removeMain').click(function(e) {
                     e.preventDefault();
                     var parent = $(this).parent().get(0).innerHTML;
@@ -209,8 +196,9 @@
                 });
 
                 $("#_eventId_Upload").click(function() {
-                    document.getElementById("additionalsOnUI").innerHTML = "<input value='" +
-                    document.getElementById("additionalFilesOnUI").innerHTML + "' name='additionalFilesInWorking' hidden/>";
+                    var input = "<input name='additionalFilesInWorking' value='";
+                    input += JSON.stringify(descriptionMap) + "'/>";
+                    document.getElementById("additionalsOnUI").innerHTML = input;
                 });
 
                 $("#uploadButton").click( function() {
@@ -240,7 +228,11 @@
                         // 12 = ('C:\fakepath\').length
                         fileName = fileNameAbsolutePath.substr(12);
                     }
-                    delete additionalFilesExitingOnUI[fileName];
+                    // find and delete the object having the filename property equals to fileName
+                    for (index in existingAdditionalFiles)
+                        if (existingAdditionalFiles[index].filename == fileName) {
+                            existingAdditionalFiles.splice(index, 1);
+                        }
                     populateDiv();
                 }
                 $(tr).empty();
@@ -250,10 +242,15 @@
                 var id = $(this).attr('id');
                 if (id != 'mainFile') {
                     var fileName = $(this)[0].files[0].name;
-                    if (additionalFilesExitingOnUI[fileName]) {
+                    if (existingAdditionalFiles.filter(function(v) {
+                        return v.filename === fileName;
+                    })[0]) {
                         alert("The file named " + fileName + " already exists. Please rename it or select another file.");
                     } else {
-                        additionalFilesExitingOnUI[fileName] = "";
+                        // add the new file to existingAdditionalFiles
+                        var newFile = {filename: fileName, description: ""}
+                        existingAdditionalFiles.push(newFile);
+                        // display it on the page
                         $(this).attr('value', fileName);
                         var discardID = "discard" + $(this).attr('id');
                         $("#"+discardID).attr('download', fileName);
@@ -283,7 +280,9 @@
                         var elements = tempDiv.childNodes;
                         fileName = elements[0].getAttribute("value");
                     }
-                    additionalFilesExitingOnUI[fileName] = $(this).val();
+                    existingAdditionalFiles.filter(function(v) {
+                        return v.filename === fileName;
+                    })[0].description = $(this).val();
                 }
                 populateDiv();
             });
