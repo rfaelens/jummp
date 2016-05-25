@@ -85,13 +85,15 @@
                     <table class='formtable' id="additionalFiles">
                         <tbody>
                             <g:if test="${workingMemory['additional_repository_files_in_working']}">
-                                <jummp:displayExistingAdditionalFiles
-                                    additionals = "${workingMemory['additional_repository_files_in_working']}"/>
+                                <g:set var="resource" value="${workingMemory['additional_repository_files_in_working']}" />
                             </g:if>
+                            <g:elseif test="${workingMemory['additional_files']}">
+                                <g:set var="resource" value="${workingMemory['additional_files']}" />
+                            </g:elseif>
                             <g:else>
-                                <jummp:displayExistingAdditionalFiles
-                                    additionals = "${workingMemory['additional_files']}"/>
+                                <g:set var="resource" value="empty" />
                             </g:else>
+                            <jummp:displayExistingAdditionalFiles additionals = "${resource}"/>
                         </tbody>
                     </table>
                     <div id="additionalFilesOnUI" name="additionalFilesOnUI" style="display: none">
