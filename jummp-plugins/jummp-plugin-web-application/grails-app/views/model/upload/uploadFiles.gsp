@@ -97,7 +97,8 @@
                         </tbody>
                     </table>
                     <div id="noAdditionals"></div>
-                    <div id="additionalsOnUI"></div>
+                    <!-- This div stores input element which value is assigned to JSON string -->
+                    <div id="additionalsOnUI" style="display: none;"></div>
                 </fieldset>
                 <div class="buttons">
                     <g:submitButton name="Cancel" value="${g.message(code: 'submission.common.cancelButton')}" />
