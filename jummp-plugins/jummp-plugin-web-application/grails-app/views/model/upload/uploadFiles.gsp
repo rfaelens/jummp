@@ -91,7 +91,7 @@
                                 <g:set var="resource" value="${workingMemory['additional_files']}" />
                             </g:elseif>
                             <g:else>
-                                <g:set var="resource" value="empty" />
+                                <g:set var="resource" value="${[]}" />
                             </g:else>
                             <jummp:displayExistingAdditionalFiles additionals = "${resource}"/>
                         </tbody>
