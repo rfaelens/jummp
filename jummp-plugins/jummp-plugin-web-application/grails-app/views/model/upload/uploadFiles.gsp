@@ -96,19 +96,6 @@
                             <jummp:displayExistingAdditionalFiles additionals = "${resource}"/>
                         </tbody>
                     </table>
-                    <div id="additionalFilesOnUI" name="additionalFilesOnUI" style="display: none">
-                        <g:if test="${workingMemory['additional_repository_files_in_working']}">
-                            <jummp:populateExistingAdditionalFilesOnUI
-                                additionalsOnUI = "${workingMemory['additional_repository_files_in_working']}"/>
-                        </g:if>
-                        <g:elseif test="${workingMemory['additional_files']}">
-                            <jummp:populateExistingAdditionalFilesOnUI
-                                additionalsOnUI = "${workingMemory['additional_files']}"/>
-                        </g:elseif>
-                        <g:else>
-                            empty
-                        </g:else>
-                    </div>
                     <div id="noAdditionals"></div>
                     <div id="additionalsOnUI"></div>
                 </fieldset>
