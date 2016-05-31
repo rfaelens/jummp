@@ -39,6 +39,7 @@ import eu.ddmore.publish.service.PublishContext
 import eu.ddmore.publish.service.PublishException
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
+import groovy.json.JsonSlurper
 import net.biomodels.jummp.model.PublicationLinkProvider
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.util.zip.ZipEntry
@@ -624,12 +625,12 @@ class ModelController {
                     // data stored are a map of file names and corresponding descriptions.
                     // For instance, manual.pdf: guidelines and help, readme.txt: introduction and preface, ...
                     Map<String, String> additionalFiles = new HashMap<String, String>()
-                    String additionalFilesInWorking = params.additionalFilesInWorking
-                    if (additionalFilesInWorking.trim() != "empty") {
-                        String[] workingFiles = additionalFilesInWorking.split(', ')
-                        workingFiles.each {
-                            def (fileName, fileDescription) = it.split(':')
-                            additionalFiles.put(fileName.trim(), fileDescription.trim())
+                    def slurper = new JsonSlurper()
+                    def result = slurper.parseText(params.additionalFilesInWorking)
+                    if (result["files"]) {
+                        def workingFiles = result["files"]
+                        workingFiles.each { f ->
+                            additionalFiles.put(f["filename"].trim(), f["description"].trim())
                         }
                         flow.workingMemory.put("additionals_in_working", additionalFiles)
                     }
