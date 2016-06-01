@@ -866,7 +866,8 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                             submissionService.updatePublicationLink(flow.workingMemory,
                                         modifications)
                         } else {
-                            flow.workingMemory.put("RetrievePubDetails", false)
+                            // go through publication editor in any case
+                            flow.workingMemory.put("RetrievePubDetails", true)
                         }
                     } else {
                         ModelTransportCommand model = flow.workingMemory.get('ModelTC') as ModelTransportCommand
