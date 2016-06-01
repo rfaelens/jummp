@@ -61,7 +61,7 @@
                             </td>
                             <td class="value">
                                 <g:if test="${workingMemory['new_description']}">
-                                    <g:textField id="description" name="name" maxlength="100" value="${workingMemory['new_description']}"/>
+                                    <g:textField id="description" name="description" maxlength="100" value="${workingMemory['new_description']}"/>
                                 </g:if>
                                 <g:else>
                                     <g:textArea id="description" cols="70" rows="10" name="description" maxlength="5000" value='${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}'/>
