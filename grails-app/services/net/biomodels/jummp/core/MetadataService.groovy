@@ -224,7 +224,7 @@ class MetadataService {
         }
     }
 
-    List<RevisionTransportCommand> executeMetadataSavingStrategy(
+    List<RepositoryFileTransportCommand> executeMetadataSavingStrategy(
                     RevisionTransportCommand revisionTransportCommand,
                     List<StatementTransportCommand> statementTransportCommands,
                     boolean isUpdate) {
