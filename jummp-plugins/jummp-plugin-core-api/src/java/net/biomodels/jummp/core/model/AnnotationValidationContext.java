@@ -16,7 +16,6 @@
 *
 * You should have received a copy of the GNU Affero General Public License along
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
-*
 **/
 
 package net.biomodels.jummp.core.model;
@@ -27,12 +26,14 @@ import java.util.List;
 import static net.biomodels.jummp.core.model.ValidationState.*;
 
 /**
- * Created by sarala on 27/05/2016.
+ * Simple class holding information about the validity of a revision's annotations.
+ *
+ * @author Sarala Wimalaratne
  */
 public class AnnotationValidationContext implements Serializable {
-    ValidationState validationLevel;
+    private ValidationState validationLevel;
 
-    String validationReport;
+    private String validationReport;
 
     public void setValidationLevel(ValidationState validationLevel) {
         this.validationLevel = validationLevel;
@@ -40,5 +41,13 @@ public class AnnotationValidationContext implements Serializable {
 
     public void setValidationReport(String validationReport) {
         this.validationReport = validationReport;
+    }
+
+    public ValidationState getValidationLevel() {
+        return validationLevel;
+    }
+
+    public String getValidationReport() {
+        return validationReport;
     }
 }
