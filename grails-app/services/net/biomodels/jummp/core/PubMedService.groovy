@@ -259,7 +259,6 @@ Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}"
                 return false
             } // return false means the author is not existing in the tobeAdded list
             if (!willBeRemovedAuthor) {
-                println("Person deleted: $index, $author.person.userRealName")
                 removePublicationAuthor(publication, author.person)
             }
         }
