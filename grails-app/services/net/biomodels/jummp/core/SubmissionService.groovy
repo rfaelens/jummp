@@ -638,11 +638,25 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.NewRevisionStateMachine.initialise")
         void initialise(Map<String, Object> workingMemory) {
-            //fetch files from repository, make RFTCs out of them
+            // fetch files from repository, make RFTCs out of them
             RTC rev = workingMemory.get("LastRevision") as RTC
             List<RFTC> repFiles = rev.getFiles()
             storeRFTC(workingMemory, repFiles, null)
             workingMemory.put("existing_files", new ArrayList<RFTC>(repFiles))
+            // initialise the map of publication type objects would be added to the model
+            String[] linkSourceTypes = PublicationLinkProvider.LinkType.values().collect {
+                PublicationLinkProvider.LinkType it -> it.label
+            }
+            Map<Object, PublicationTransportCommand> publication_objects_in_working =
+                new HashMap<Object,PublicationTransportCommand>()
+            linkSourceTypes.each {
+                publication_objects_in_working.put(it, null)
+            }
+            if (rev.model.publication) {
+                publication_objects_in_working.put(rev.model.publication.linkProvider.linkType,
+                    rev.model.publication)
+            }
+            workingMemory.put("publication_objects_in_working", publication_objects_in_working)
             sessionFactory.currentSession.clear()
         }
 
