@@ -105,12 +105,16 @@ class PubMedService {
                                      Person person,
                                      String realName,
                                      Integer position) {
-       def tmp = new PublicationPerson(publication: publication,
+        def tmp = new PublicationPerson(publication: publication,
                                 person: person,
                                 pubAlias: realName,
                                 position: position)
-      tmp.save(failOnError:true, flush: true);
-     }
+        if (!tmp.save(flush: true)) {
+            log.error("""\
+Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}""")
+        }
+    }
+
 
 
     private setFieldIfItExists(String fieldName, PublicationTransportCommand publication, def xmlField, boolean castToInt) {
