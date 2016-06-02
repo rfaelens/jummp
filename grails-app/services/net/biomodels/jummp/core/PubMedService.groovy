@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2016 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -52,6 +52,8 @@ import org.apache.commons.logging.LogFactory
  * parses the returned HTML page for the publication information.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @author Tung Nguyen <tung.nguyen@ebi.ac.uk>
  */
 class PubMedService {
     final Log log = LogFactory.getLog(getClass())
@@ -114,7 +116,6 @@ class PubMedService {
 Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}""")
         }
     }
-
 
     public void removePublicationAuthor(Publication publication, Person person) {
         def tobeDeleted = PublicationPerson.findByPublicationAndPerson(publication, person)
@@ -264,7 +265,6 @@ Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}"
         }
     }
 
-
     Publication fromCommandObject(PublicationTransportCommand cmd) {
         Publication publication = Publication.createCriteria().get() {
             eq("link",cmd.link)
@@ -310,5 +310,4 @@ Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}"
         }
         return publ
     }
-
 }
