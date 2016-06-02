@@ -851,7 +851,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                     return error()
                 }
                 Map<String,String> modifications = new HashMap<String,String>()
-                    if (params.PubLinkProvider) {
+                    if (params.PubLinkProvider) {// one of the publication link providers has been selected
                         if (!pubMedService.verifyLink(params.PubLinkProvider, params.PublicationLink)) {
                             flash.flashMessage = "The link is not a valid ${params.PubLinkProvider}"
                             return error()
@@ -863,13 +863,13 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                         if (providerHasChanged || linkHasChanged) {
                             modifications.put("PubLinkProvider", params.PubLinkProvider)
                             modifications.put("PubLink", params.PublicationLink)
-                            submissionService.updatePublicationLink(flow.workingMemory,
-                                        modifications)
+                            submissionService.updatePublicationLink(flow.workingMemory, modifications)
                         } else {
                             // go through publication editor in any case
                             flow.workingMemory.put("RetrievePubDetails", true)
                         }
-                    } else {
+                        flow.workingMemory.put("SelectedPubLinkProvider", params.PubLinkProvider)
+                    } else { // 'No publication available' has been chosen
                         ModelTransportCommand model = flow.workingMemory.get('ModelTC') as ModelTransportCommand
                         RevisionTransportCommand revision = flow.workingMemory.get("RevisionTC") as RevisionTransportCommand
                         def publication = revision.model.publication
