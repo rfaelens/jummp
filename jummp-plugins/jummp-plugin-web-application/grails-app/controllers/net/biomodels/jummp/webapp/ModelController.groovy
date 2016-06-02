@@ -956,6 +956,9 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
             on("Continue"){
                 ModelTransportCommand model =
                             flow.workingMemory.get("ModelTC") as ModelTransportCommand
+                def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationTransportCommand>
+                PublicationTransportCommand tempPTC = publicationMap.get(flow.workingMemory.get("SelectedPubLinkProvider")) as PublicationTransportCommand
+                bindData(tempPTC, params, [exclude: ['authors']])
                 bindData(model.publication, params, [exclude: ['authors']])
                 String[] authorList = params.authorFieldTotal.split(",")
                 List<PersonTransportCommand> validatedAuthors = new LinkedList<PersonTransportCommand>()
@@ -1006,9 +1009,8 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                     return error()
                 }
                 // Update the publication objects in working
-                PublicationTransportCommand pubTC = model.publication
-                def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationTransportCommand>
-                publicationMap.put(flow.workingMemory.get("SelectedPubLinkProvider"), pubTC)
+                tempPTC.authors = validatedAuthors
+                publicationMap.put(flow.workingMemory.get("SelectedPubLinkProvider"), tempPTC)
             }.to "displaySummaryOfChanges"
             on("Cancel").to "cleanUpAndTerminate"
             on("Back").to "enterPublicationLink"
