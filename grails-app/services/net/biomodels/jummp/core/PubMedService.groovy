@@ -116,6 +116,12 @@ Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}"
     }
 
 
+    public void removePublicationAuthor(Publication publication, Person person) {
+        def tobeDeleted = PublicationPerson.findByPublicationAndPerson(publication, person)
+        if (tobeDeleted) {
+            tobeDeleted.delete()
+        }
+    }
 
     private setFieldIfItExists(String fieldName, PublicationTransportCommand publication, def xmlField, boolean castToInt) {
         try
@@ -239,7 +245,25 @@ Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}"
                     existingAuthor.save()
                 }
             }
-         }
+        }
+
+        existing.eachWithIndex{ PublicationPerson author, int index ->
+            // find the authors will be remove out of the publication authors
+            def willBeRemovedAuthor = tobeAdded.find { willBeAddedAuthor ->
+                if (willBeAddedAuthor.id) {
+                    return willBeAddedAuthor.id == author.person.id
+                }
+                else if (willBeAddedAuthor.orcid) {
+                    return willBeAddedAuthor.orcid == author.person.orcid
+                }
+                return false
+            } // return false means the author is not existing in the tobeAdded list
+            if (!willBeRemovedAuthor) {
+                println("Person deleted: $index, $author.person.userRealName")
+                existing.remove(index)
+                removePublicationAuthor(publication, author.person)
+            }
+        }
     }
 
 
