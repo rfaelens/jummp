@@ -45,9 +45,11 @@
             revision = workingMemory.get("RevisionTC") as RevisionTransportCommand
             publication = revision?.model?.publication
             def publicationMap = workingMemory.get('publication_objects_in_working') as HashMap<Object, PublicationTransportCommand>
-            PublicationTransportCommand pubTC = publicationMap.get(workingMemory.get('SelectedPubLinkProvider'))
-            if (pubTC) {
-                publication = pubTC
+            if (workingMemory.containsKey('SelectedPubLinkProvider')) {
+                PublicationTransportCommand pubTC = publicationMap.get(workingMemory.get('SelectedPubLinkProvider'))
+                if (pubTC) {
+                    publication = pubTC
+                }
             }
         %>
         <h2><g:message code="submission.publicationLink.header"/></h2>
