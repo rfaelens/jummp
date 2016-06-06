@@ -545,12 +545,14 @@ class SubmissionService {
     class NewModelStateMachine extends StateMachineStrategy {
 
         /**
-         * Purpose Dont need to do anything to initialise
+         * Initialises the publication objects of publication link provider that could be used
+         * during submission process currently.
          *
          * @param workingMemory a Map containing all objects exchanged throughout the flow.
          */
         void initialise(Map<String, Object> workingMemory) {
-            //need to do nothing
+            def publication_objects_in_working = initialisePublicationMap()
+            workingMemory.put("publication_objects_in_working", publication_objects_in_working)
         }
 
         void removeFromVCS(Map<String, Object> workingMemory, List<RFTC> filesToDelete) {
@@ -631,8 +633,9 @@ class SubmissionService {
     class NewRevisionStateMachine extends StateMachineStrategy {
 
         /**
-         * Initialises the revision transport command object and the currently
-         * existing files associated with the revision in working memory.
+         * Initialises the revision transport command object, the currently
+         * existing files associated with the revision in working memory, and the publication
+         * objects that could be used during submission process.
          *
          * @param workingMemory a Map containing all objects exchanged throughout the flow.
          */
@@ -644,14 +647,7 @@ class SubmissionService {
             storeRFTC(workingMemory, repFiles, null)
             workingMemory.put("existing_files", new ArrayList<RFTC>(repFiles))
             // initialise the map of publication type objects would be added to the model
-            String[] linkSourceTypes = PublicationLinkProvider.LinkType.values().collect {
-                PublicationLinkProvider.LinkType it -> it.label
-            }
-            Map<Object, PublicationTransportCommand> publication_objects_in_working =
-                new HashMap<Object,PublicationTransportCommand>()
-            linkSourceTypes.each {
-                publication_objects_in_working.put(it, null)
-            }
+            def publication_objects_in_working = initialisePublicationMap()
             if (rev.model.publication) {
                 publication_objects_in_working.put(rev.model.publication.linkProvider.linkType,
                     rev.model.publication)
@@ -941,5 +937,22 @@ class SubmissionService {
     protected List getRepFiles(Map workingMemory,
             String mapName = "repository_files") {
         return (List) workingMemory.get(mapName)
+    }
+
+    /**
+     * Purpose: Utility method to generate the publication map of
+     * publication link providers could be used during submission process. It enables to keep
+     * track of information submitter has entered in publication editor form so avoid losing it.
+     */
+    private Map<Object, PublicationTransportCommand> initialisePublicationMap() {
+        String[] linkSourceTypes = PublicationLinkProvider.LinkType.values().collect {
+            PublicationLinkProvider.LinkType it -> it.label
+        }
+        Map<Object, PublicationTransportCommand> publication_objects_in_working =
+            new HashMap<Object,PublicationTransportCommand>()
+        linkSourceTypes.each {
+            publication_objects_in_working.put(it, null)
+        }
+        publication_objects_in_working
     }
 }
