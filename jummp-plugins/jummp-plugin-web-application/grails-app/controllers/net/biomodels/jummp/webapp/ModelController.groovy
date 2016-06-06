@@ -632,7 +632,7 @@ class ModelController {
                     if (result["files"]) {
                         def workingFiles = result["files"]
                         workingFiles.each { f ->
-                            additionalFiles.put(f["filename"].trim(), f["description"].trim())
+                            additionalFiles.put(f["filename"], f["description"])
                         }
                         flow.workingMemory.put("additionals_in_working", additionalFiles)
                     }
