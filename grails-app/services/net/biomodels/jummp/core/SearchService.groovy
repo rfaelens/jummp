@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
+import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.ModelFormat
@@ -372,6 +373,7 @@ class SearchService {
                             submissionDate: it.get("submissionDate"),
                             lastModifiedDate: it.get("lastModified"),
                             id: it.get("model_id"),
+                            state: it.get("public") ? ModelState.PUBLISHED : ModelState.UNPUBLISHED,
                             format: DomainAdapter.getAdapter(
                                         ModelFormat.findByName(it.get("modelFormat")))
                                         .toCommandObject()
