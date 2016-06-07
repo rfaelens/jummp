@@ -535,6 +535,24 @@ class SubmissionService {
             new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true,
                     hidden: false, description: description)
         }
+
+
+        /**
+         * Purpose: Utility method to generate the publication map of
+         * publication link providers could be used during submission process. It enables to keep
+         * track of information submitter has entered in publication editor form so avoid losing it.
+         */
+        protected Map<Object, PublicationTransportCommand> initialisePublicationMap() {
+            String[] linkSourceTypes = PublicationLinkProvider.LinkType.values().collect {
+                PublicationLinkProvider.LinkType it -> it.label
+            }
+            Map<Object, PublicationTransportCommand> publication_objects_in_working =
+                new HashMap<Object,PublicationTransportCommand>()
+            linkSourceTypes.each {
+                publication_objects_in_working.put(it, null)
+            }
+            publication_objects_in_working
+        }
     }
 
     /**
@@ -941,20 +959,5 @@ class SubmissionService {
         return (List) workingMemory.get(mapName)
     }
 
-    /**
-     * Purpose: Utility method to generate the publication map of
-     * publication link providers could be used during submission process. It enables to keep
-     * track of information submitter has entered in publication editor form so avoid losing it.
-     */
-    private Map<Object, PublicationTransportCommand> initialisePublicationMap() {
-        String[] linkSourceTypes = PublicationLinkProvider.LinkType.values().collect {
-            PublicationLinkProvider.LinkType it -> it.label
-        }
-        Map<Object, PublicationTransportCommand> publication_objects_in_working =
-            new HashMap<Object,PublicationTransportCommand>()
-        linkSourceTypes.each {
-            publication_objects_in_working.put(it, null)
-        }
-        publication_objects_in_working
-    }
+
 }
