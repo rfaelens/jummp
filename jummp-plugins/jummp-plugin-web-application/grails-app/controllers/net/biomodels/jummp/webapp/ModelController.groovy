@@ -40,6 +40,7 @@ import eu.ddmore.publish.service.PublishException
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
 import groovy.json.JsonSlurper
+import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.model.PublicationLinkProvider
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.util.zip.ZipEntry
@@ -47,6 +48,7 @@ import java.util.zip.ZipOutputStream
 import net.biomodels.jummp.core.model.ModelAuditTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.PermissionTransportCommand
+import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC
@@ -630,7 +632,7 @@ class ModelController {
                     if (result["files"]) {
                         def workingFiles = result["files"]
                         workingFiles.each { f ->
-                            additionalFiles.put(f["filename"].trim(), f["description"].trim())
+                            additionalFiles.put(f["filename"], f["description"])
                         }
                         flow.workingMemory.put("additionals_in_working", additionalFiles)
                     }
@@ -851,7 +853,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                     return error()
                 }
                 Map<String,String> modifications = new HashMap<String,String>()
-                    if (params.PubLinkProvider) {
+                    if (params.PubLinkProvider) {// one of the publication link providers has been selected
                         if (!pubMedService.verifyLink(params.PubLinkProvider, params.PublicationLink)) {
                             flash.flashMessage = "The link is not a valid ${params.PubLinkProvider}"
                             return error()
@@ -863,12 +865,13 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                         if (providerHasChanged || linkHasChanged) {
                             modifications.put("PubLinkProvider", params.PubLinkProvider)
                             modifications.put("PubLink", params.PublicationLink)
-                            submissionService.updatePublicationLink(flow.workingMemory,
-                                        modifications)
+                            submissionService.updatePublicationLink(flow.workingMemory, modifications)
                         } else {
-                            flow.workingMemory.put("RetrievePubDetails", false)
+                            // go through publication editor in any case
+                            flow.workingMemory.put("RetrievePubDetails", true)
                         }
-                    } else {
+                        flow.workingMemory.put("SelectedPubLinkProvider", params.PubLinkProvider)
+                    } else { // 'No publication available' has been chosen
                         ModelTransportCommand model = flow.workingMemory.get('ModelTC') as ModelTransportCommand
                         RevisionTransportCommand revision = flow.workingMemory.get("RevisionTC") as RevisionTransportCommand
                         def publication = revision.model.publication
@@ -888,24 +891,56 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
             action {
                 if (flow.workingMemory.remove("RetrievePubDetails") as Boolean) {
                     ModelTransportCommand model = flow.workingMemory.get("ModelTC") as ModelTransportCommand
-                    if (model.publication.link && model.publication.linkProvider) {
+                    if (model.publication.linkProvider) {
+                        // PUBMED, DOI, CUSTOM, MANUAL_ENTRY
                         def retrieved
-                        try {
-                            retrieved = pubMedService.getPublication(model.publication)
+                        if (model.publication.linkProvider.linkType == PublicationLinkProvider.LinkType.PUBMED.label)
+                            try {
+                                retrieved = pubMedService.getPublication(model.publication)
+                            }
+                            catch(Exception e) {
+                                log.error(e.message, e)
+                            }
+                        else {
+                            // TODO: implement publication services for other types of publication differing from PUBMED
+                            def provider = PublicationLinkProvider.LinkType.findLinkTypeByLabel(params.PubLinkProvider)
+                            retrieved = Publication.createCriteria().get() {
+                                eq("link",params.PublicationLink)
+                                linkProvider {
+                                    eq("linkType", provider)
+                                }
+                            }
+                            if (retrieved) {
+                                PublicationTransportCommand publicationTC = DomainAdapter.getAdapter(retrieved).toCommandObject()
+                                retrieved = publicationTC
+                            } else {
+                                def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationTransportCommand>
+                                retrieved = publicationMap.get(params.PubLinkProvider)
+                                if (!retrieved) {
+                                    retrieved = new PublicationTransportCommand()
+                                    PublicationLinkProvider pubLinkProvider = PublicationLinkProvider.createCriteria().get() {
+                                        eq("linkType", provider)
+                                    }
+                                    retrieved.link = params.PublicationLink
+                                    retrieved.linkProvider = DomainAdapter.getAdapter(pubLinkProvider).toCommandObject()
+                                    retrieved.authors = []
+                                }
+                            }
                         }
-                        catch(Exception e) {
-                            log.error(e.message, e)
-                        }
+
                         if (retrieved) {
                             model.publication = retrieved
                             flow.workingMemory.put("Authors", model.publication.authors)
+
+                            // Update the publication objects in working
+                            def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationTransportCommand>
+                            publicationMap.put(params.PubLinkProvider, retrieved as PublicationTransportCommand)
                         }
                     }
                     // use authors of the existing publication if available
                     if (model.publication) {
                         flow.workingMemory.put("Authors", model.publication.authors)
                     }
-                    flow.workingMemory.put("Authors", model.publication.authors)
                     conversation.changesMade.add("Amended publication details")
                     publicationInfoPage()
                 }
@@ -921,6 +956,9 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
             on("Continue"){
                 ModelTransportCommand model =
                             flow.workingMemory.get("ModelTC") as ModelTransportCommand
+                def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationTransportCommand>
+                PublicationTransportCommand tempPTC = publicationMap.get(flow.workingMemory.get("SelectedPubLinkProvider")) as PublicationTransportCommand
+                bindData(tempPTC, params, [exclude: ['authors']])
                 bindData(model.publication, params, [exclude: ['authors']])
                 String[] authorList = params.authorFieldTotal.split(",")
                 List<PersonTransportCommand> validatedAuthors = new LinkedList<PersonTransportCommand>()
@@ -970,6 +1008,9 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                     flash.validationErrorOn = model.publication
                     return error()
                 }
+                // Update the publication objects in working
+                tempPTC.authors = validatedAuthors
+                publicationMap.put(flow.workingMemory.get("SelectedPubLinkProvider"), tempPTC)
             }.to "displaySummaryOfChanges"
             on("Cancel").to "cleanUpAndTerminate"
             on("Back").to "enterPublicationLink"

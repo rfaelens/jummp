@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2016 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -52,6 +52,8 @@ import org.apache.commons.logging.LogFactory
  * parses the returned HTML page for the publication information.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @author Tung Nguyen <tung.nguyen@ebi.ac.uk>
  */
 class PubMedService {
     final Log log = LogFactory.getLog(getClass())
@@ -105,13 +107,22 @@ class PubMedService {
                                      Person person,
                                      String realName,
                                      Integer position) {
-       def tmp = new PublicationPerson(publication: publication,
+        def tmp = new PublicationPerson(publication: publication,
                                 person: person,
                                 pubAlias: realName,
                                 position: position)
-      tmp.save(failOnError:true, flush: true);
-     }
+        if (!tmp.save(flush: true)) {
+            log.error("""\
+Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}""")
+        }
+    }
 
+    public void removePublicationAuthor(Publication publication, Person person) {
+        def tobeDeleted = PublicationPerson.findByPublicationAndPerson(publication, person)
+        if (tobeDeleted) {
+            tobeDeleted.delete()
+        }
+    }
 
     private setFieldIfItExists(String fieldName, PublicationTransportCommand publication, def xmlField, boolean castToInt) {
         try
@@ -235,9 +246,24 @@ class PubMedService {
                     existingAuthor.save()
                 }
             }
-         }
-    }
+        }
 
+        existing.eachWithIndex{ PublicationPerson author, int index ->
+            // find the authors will be remove out of the publication authors
+            def willBeRemovedAuthor = tobeAdded.find { willBeAddedAuthor ->
+                if (willBeAddedAuthor.id) {
+                    return willBeAddedAuthor.id == author.person.id
+                }
+                else if (willBeAddedAuthor.orcid) {
+                    return willBeAddedAuthor.orcid == author.person.orcid
+                }
+                return false
+            } // return false means the author is not existing in the tobeAdded list
+            if (!willBeRemovedAuthor) {
+                removePublicationAuthor(publication, author.person)
+            }
+        }
+    }
 
     Publication fromCommandObject(PublicationTransportCommand cmd) {
         Publication publication = Publication.createCriteria().get() {
@@ -284,5 +310,4 @@ class PubMedService {
         }
         return publ
     }
-
 }

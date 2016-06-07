@@ -64,7 +64,7 @@
       body {
           margin: 0 auto;
           /*overflow-x: hidden;*/
-          overflow-y: auto;
+          /*overflow-y: auto;*/
       }
   </style>
   
