@@ -42,10 +42,10 @@ class JummpTagLib {
         isDDMoReDeployment() ? ddmoreCode : defaultCode
     }
 
-    def findMainFileLabel = {
+    def findMainFileLabel = { attrs, body ->
         String msg = selectDDMoReAwareMessageCode("submission.upload.mainFile.ddmore.label",
                 "submission.upload.mainFile.label")
-        g.message(code: msg)
+        out << body(mainFile: g.message(code: msg))
     }
 
     def displayExistingMainFile = { attrs ->
