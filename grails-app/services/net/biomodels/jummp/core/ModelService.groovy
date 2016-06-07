@@ -1981,7 +1981,10 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         def publicRevisionCriteriaResults = publicRevisionCriteria.list(max: 1) {
             and {
                 eq("model", model)
-                ne("state", ModelState.UNPUBLISHED)
+                or {
+                    eq("state", ModelState.PUBLISHED)
+                    eq("state", ModelState.RELEASED)
+                }
             }
         }
         [] != publicRevisionCriteriaResults
