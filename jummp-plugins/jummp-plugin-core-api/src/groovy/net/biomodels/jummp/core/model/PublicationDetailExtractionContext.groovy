@@ -25,16 +25,17 @@
 package net.biomodels.jummp.core.model
 
 /**
- * @short Simple representation of a PUBMED publication.
+ * @short Simple wrapper around a publication to capture how the its details were retrieved.
  *
- * Capture information of PUBMED publication.
+ * Instances of this class specify, through the flag comesFromDatabase, whether a publication
+ * has been fetched from the database, or from an external service.
  *
  * @author Tung Nguyen <tung.nguyen@ebi.ac.uk>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @date created on 08/06/16.
  */
-
-class PubMedTransportCommand implements Serializable {
+//PublicationInformationExtractionContext
+class PublicationDetailExtractionContext implements Serializable {
     private static final long serialVersionUID = 1L
     /**
      * Information about the Publication.
@@ -42,7 +43,8 @@ class PubMedTransportCommand implements Serializable {
     PublicationTransportCommand publication
 
     /**
-     * Flag on/off to indicate that the publication is loaded from in-house database.
+     * Flag to indicate whether the publication was found in the database or via an
+     * external call e.g. to PubMedService.
      */
-    boolean isInHouseDatabase
+    boolean comesFromDatabase
 }
