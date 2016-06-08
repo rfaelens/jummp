@@ -917,13 +917,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                                 def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationTransportCommand>
                                 retrieved = publicationMap.get(params.PubLinkProvider)
                                 if (!retrieved) {
-                                    retrieved = new PublicationTransportCommand()
-                                    PublicationLinkProvider pubLinkProvider = PublicationLinkProvider.createCriteria().get() {
-                                        eq("linkType", provider)
-                                    }
-                                    retrieved.link = params.PublicationLink
-                                    retrieved.linkProvider = DomainAdapter.getAdapter(pubLinkProvider).toCommandObject()
-                                    retrieved.authors = []
+                                    retrieved = pubMedService.createPTCWithMinimalInformation(params.PubLinkProvider, params.PublicationLink, [])
                                 }
                             }
                         }

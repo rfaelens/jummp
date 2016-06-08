@@ -34,6 +34,7 @@ import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.PublicationPerson
 import net.biomodels.jummp.model.PublicationLinkProvider
+import net.biomodels.jummp.plugins.security.PersonTransportCommand
 import org.springframework.validation.ObjectError
 import org.xml.sax.SAXParseException
 import org.springframework.transaction.annotation.Transactional
@@ -309,5 +310,19 @@ Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}"
             log.error("Error encountered while saving publication ${publ.dump()}: $err".toString())
         }
         return publ
+    }
+
+    PublicationTransportCommand createPTCWithMinimalInformation(String pubLinkProvider,
+                                                                String pubLink,
+                                                                List<PersonTransportCommand> authors) {
+        def provider = PublicationLinkProvider.LinkType.findLinkTypeByLabel(pubLinkProvider)
+        PublicationTransportCommand retrieved = new PublicationTransportCommand()
+        PublicationLinkProvider publicationLinkProvider = PublicationLinkProvider.createCriteria().get() {
+            eq("linkType", provider)
+        }
+        retrieved.link = pubLink
+        retrieved.linkProvider = DomainAdapter.getAdapter(publicationLinkProvider).toCommandObject()
+        retrieved.authors = authors
+        retrieved
     }
 }
