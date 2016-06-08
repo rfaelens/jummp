@@ -31,6 +31,7 @@
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.adapters.DomainAdapter
+import net.biomodels.jummp.core.model.PubMedTransportCommand
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.PublicationPerson
 import net.biomodels.jummp.model.PublicationLinkProvider
@@ -60,21 +61,25 @@ class PubMedService {
     final Log log = LogFactory.getLog(getClass())
     static transactional = true
 
-    PublicationTransportCommand getPublication(String id) throws JummpException {
+    PubMedTransportCommand getPublication(String id) throws JummpException {
         Publication publication = Publication.createCriteria().get() {
             eq("link",id)
             linkProvider {
-                eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
+                eq("linkType", PublicationLinkProvider.LinkType.PUBMED)
             }
         }
+        PubMedTransportCommand pubMTC = new  PubMedTransportCommand()
         if (publication) {
-            return DomainAdapter.getAdapter(publication).toCommandObject();
+            pubMTC.publication = DomainAdapter.getAdapter(publication).toCommandObject()
+            pubMTC.isInHouseDatabase = true
         } else {
-            return fetchPublicationData(id)
+            pubMTC.publication = fetchPublicationData(id)
+            pubMTC.isInHouseDatabase = false
         }
+        pubMTC
     }
 
-    PublicationTransportCommand getPublication(PublicationTransportCommand cmd) throws JummpException {
+    PubMedTransportCommand getPublication(PublicationTransportCommand cmd) throws JummpException {
         PublicationLinkProvider.LinkType type =
                 PublicationLinkProvider.LinkType.findLinkTypeByLabel(cmd.linkProvider.linkType)
         if (type == PublicationLinkProvider.LinkType.PUBMED) {

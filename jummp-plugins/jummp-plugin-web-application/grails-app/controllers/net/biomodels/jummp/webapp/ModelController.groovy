@@ -239,7 +239,6 @@ class ModelController {
             List<RevisionTransportCommand> revs =
                         modelDelegateService.getAllRevisions(PERENNIAL_ID)
 
-
             def model = [revision: rev,
                         authors: rev.model.creators,
                         allRevs: revs,
@@ -897,6 +896,11 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                         if (model.publication.linkProvider.linkType == PublicationLinkProvider.LinkType.PUBMED.label)
                             try {
                                 retrieved = pubMedService.getPublication(model.publication)
+                                retrieved
+                                if (retrieved.isInHouseDatabase) {
+                                    flash.flashMessage = g.message(code: "publication.editor.duplicateEntry.message")
+                                    retrieved = retrieved.publication
+                                }
                             }
                             catch(Exception e) {
                                 log.error(e.message, e)
@@ -912,6 +916,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                             }
                             if (retrieved) {
                                 PublicationTransportCommand publicationTC = DomainAdapter.getAdapter(retrieved).toCommandObject()
+                                flash.flashMessage = g.message(code: "publication.editor.duplicateEntry.message")
                                 retrieved = publicationTC
                             } else {
                                 def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationTransportCommand>
