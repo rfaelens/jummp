@@ -96,9 +96,9 @@ class ModelController {
      */
     def grailsApplication
     /**
-    * Dependency injection of pubMedService
-    */
-    def pubMedService
+     * Dependency injection of PublicationService
+     */
+    def publicationService
     /*
     * Dependency injection of mailService
     */
@@ -853,7 +853,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 }
                 Map<String,String> modifications = new HashMap<String,String>()
                     if (params.PubLinkProvider) {// one of the publication link providers has been selected
-                        if (!pubMedService.verifyLink(params.PubLinkProvider, params.PublicationLink)) {
+                        if (!publicationService.verifyLink(params.PubLinkProvider, params.PublicationLink)) {
                             flash.flashMessage = "The link is not a valid ${params.PubLinkProvider}"
                             return error()
                         }
