@@ -18,6 +18,7 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="net.biomodels.jummp.core.model.ModelTransportCommand" %>
+<%@ page import="net.biomodels.jummp.core.model.PublicationDetailExtractionContext" %>
 <%@ page import="net.biomodels.jummp.core.model.RevisionTransportCommand" %>
 <%@ page import="net.biomodels.jummp.core.model.PublicationTransportCommand" %>
     <head>
@@ -38,10 +39,10 @@
         <%
             RevisionTransportCommand revision = workingMemory.get("RevisionTC") as RevisionTransportCommand
             PublicationTransportCommand publication  = revision?.model?.publication as PublicationTransportCommand
-            def publicationMap = workingMemory.get('publication_objects_in_working') as HashMap<Object, PublicationTransportCommand>
-            PublicationTransportCommand pubTC = publicationMap.get(workingMemory.get('SelectedPubLinkProvider'))
-            if (pubTC) {
-                publication = pubTC
+            def publicationMap = workingMemory.get('publication_objects_in_working') as HashMap<Object, PublicationDetailExtractionContext>
+            PublicationDetailExtractionContext pubContext = publicationMap.get(workingMemory.get('SelectedPubLinkProvider'))
+            if (pubContext && pubContext.publication) {
+                publication = pubContext.publication
             }
         %>
         <h2>Update Publication Information</h2>
