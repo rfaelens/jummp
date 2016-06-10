@@ -34,7 +34,6 @@ package net.biomodels.jummp.core.model
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @date created on 08/06/16.
  */
-//PublicationInformationExtractionContext
 class PublicationDetailExtractionContext implements Serializable {
     private static final long serialVersionUID = 1L
     /**
