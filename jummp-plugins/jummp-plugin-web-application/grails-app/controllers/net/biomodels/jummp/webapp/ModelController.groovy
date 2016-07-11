@@ -41,6 +41,7 @@ import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
 import groovy.json.JsonSlurper
 import net.biomodels.jummp.core.adapters.DomainAdapter
+import net.biomodels.jummp.core.model.PublicationDetailExtractionContext
 import net.biomodels.jummp.model.PublicationLinkProvider
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.util.zip.ZipEntry
@@ -96,9 +97,9 @@ class ModelController {
      */
     def grailsApplication
     /**
-    * Dependency injection of pubMedService
-    */
-    def pubMedService
+     * Dependency injection of PublicationService
+     */
+    def publicationService
     /*
     * Dependency injection of mailService
     */
@@ -238,7 +239,6 @@ class ModelController {
             }
             List<RevisionTransportCommand> revs =
                         modelDelegateService.getAllRevisions(PERENNIAL_ID)
-
 
             def model = [revision: rev,
                         authors: rev.model.creators,
@@ -854,7 +854,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 }
                 Map<String,String> modifications = new HashMap<String,String>()
                     if (params.PubLinkProvider) {// one of the publication link providers has been selected
-                        if (!pubMedService.verifyLink(params.PubLinkProvider, params.PublicationLink)) {
+                        if (!publicationService.verifyLink(params.PubLinkProvider, params.PublicationLink)) {
                             flash.flashMessage = "The link is not a valid ${params.PubLinkProvider}"
                             return error()
                         }
@@ -892,40 +892,37 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 if (flow.workingMemory.remove("RetrievePubDetails") as Boolean) {
                     ModelTransportCommand model = flow.workingMemory.get("ModelTC") as ModelTransportCommand
                     if (model.publication.linkProvider) {
-                        // PUBMED, DOI, CUSTOM, MANUAL_ENTRY
-                        def retrieved
-                        if (model.publication.linkProvider.linkType == PublicationLinkProvider.LinkType.PUBMED.label)
-                            try {
-                                retrieved = pubMedService.getPublication(model.publication)
-                            }
-                            catch(Exception e) {
-                                log.error(e.message, e)
-                            }
-                        else {
-                            // TODO: implement publication services for other types of publication differing from PUBMED
-                            def provider = PublicationLinkProvider.LinkType.findLinkTypeByLabel(params.PubLinkProvider)
-                            retrieved = Publication.createCriteria().get() {
-                                eq("link",params.PublicationLink)
-                                linkProvider {
-                                    eq("linkType", provider)
+                        PublicationTransportCommand retrieved
+                        PublicationDetailExtractionContext publicationContext
+                        // Case: PUBMED, DOI, CUSTOM, MANUAL_ENTRY
+                        if (flow.workingMemory.containsKey("publication_objects_in_working")) {
+                            def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationDetailExtractionContext>
+                            publicationContext = publicationMap.get(params.PubLinkProvider)
+                            if (publicationContext.publication) {
+                                // reload the publication from cache
+                                retrieved = publicationContext.publication
+                                if (publicationContext.comesFromDatabase) {
+                                    flash.flashMessage = g.message(code: "publication.editor.duplicateEntry.message")
                                 }
-                            }
-                            if (retrieved) {
-                                PublicationTransportCommand publicationTC = DomainAdapter.getAdapter(retrieved).toCommandObject()
-                                retrieved = publicationTC
-                            } else {
-                                def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationTransportCommand>
-                                retrieved = publicationMap.get(params.PubLinkProvider)
-                                if (!retrieved) {
-                                    retrieved = new PublicationTransportCommand()
-                                    PublicationLinkProvider pubLinkProvider = PublicationLinkProvider.createCriteria().get() {
-                                        eq("linkType", provider)
+                            } else { // load from database, external call or create a default PTC
+                                try {
+                                    publicationContext = publicationService.getPublicationExtractionContext(model.publication)
+                                    if (publicationContext.publication) {
+                                        retrieved = publicationContext.publication
+                                        if (publicationContext.comesFromDatabase) {
+                                            flash.flashMessage = g.message(code: "publication.editor.duplicateEntry.message")
+                                        }
+                                    } else {
+                                        retrieved = publicationService.createPTCWithMinimalInformation(params.PubLinkProvider, params.PublicationLink, [])
+                                        publicationContext.comesFromDatabase = false
                                     }
-                                    retrieved.link = params.PublicationLink
-                                    retrieved.linkProvider = DomainAdapter.getAdapter(pubLinkProvider).toCommandObject()
-                                    retrieved.authors = []
+                                }
+                                catch (Exception e) {
+                                    log.error(e.message, e)
                                 }
                             }
+                        } else {
+                            log.error("Expected publication objects initialised in workingMemory.")
                         }
 
                         if (retrieved) {
@@ -933,8 +930,9 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                             flow.workingMemory.put("Authors", model.publication.authors)
 
                             // Update the publication objects in working
-                            def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationTransportCommand>
-                            publicationMap.put(params.PubLinkProvider, retrieved as PublicationTransportCommand)
+                            def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationDetailExtractionContext>
+                            publicationContext.publication = retrieved
+                            publicationMap.put(params.PubLinkProvider, publicationContext)
                         }
                     }
                     // use authors of the existing publication if available
@@ -956,8 +954,9 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
             on("Continue"){
                 ModelTransportCommand model =
                             flow.workingMemory.get("ModelTC") as ModelTransportCommand
-                def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationTransportCommand>
-                PublicationTransportCommand tempPTC = publicationMap.get(flow.workingMemory.get("SelectedPubLinkProvider")) as PublicationTransportCommand
+                def publicationMap = flow.workingMemory.get("publication_objects_in_working") as Map<Object, PublicationDetailExtractionContext>
+                PublicationDetailExtractionContext pubContext = publicationMap.get(flow.workingMemory.get("SelectedPubLinkProvider"))
+                PublicationTransportCommand tempPTC = pubContext.publication
                 bindData(tempPTC, params, [exclude: ['authors']])
                 bindData(model.publication, params, [exclude: ['authors']])
                 String[] authorList = params.authorFieldTotal.split(",")
@@ -1010,7 +1009,8 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                 }
                 // Update the publication objects in working
                 tempPTC.authors = validatedAuthors
-                publicationMap.put(flow.workingMemory.get("SelectedPubLinkProvider"), tempPTC)
+                pubContext.publication = tempPTC
+                publicationMap.put(flow.workingMemory.get("SelectedPubLinkProvider"), pubContext)
             }.to "displaySummaryOfChanges"
             on("Cancel").to "cleanUpAndTerminate"
             on("Back").to "enterPublicationLink"

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+ * Copyright (C) 2010-2016 EMBL-European Bioinformatics Institute (EMBL-EBI),
  * Deutsches Krebsforschungszentrum (DKFZ)
  *
  * This file is part of Jummp.
@@ -38,6 +38,7 @@ import groovy.transform.TypeCheckingMode
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
+import net.biomodels.jummp.core.model.PublicationDetailExtractionContext
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.model.PublicationTransportCommand
@@ -542,14 +543,17 @@ class SubmissionService {
          * publication link providers could be used during submission process. It enables to keep
          * track of information submitter has entered in publication editor form so avoid losing it.
          */
-        protected Map<Object, PublicationTransportCommand> initialisePublicationMap() {
+        protected Map<Object, PublicationDetailExtractionContext> initialisePublicationMap() {
             String[] linkSourceTypes = PublicationLinkProvider.LinkType.values().collect {
                 PublicationLinkProvider.LinkType it -> it.label
             }
-            Map<Object, PublicationTransportCommand> publication_objects_in_working =
-                new HashMap<Object,PublicationTransportCommand>()
+            Map<Object, PublicationDetailExtractionContext> publication_objects_in_working =
+                new HashMap<Object,PublicationDetailExtractionContext>()
             linkSourceTypes.each {
-                publication_objects_in_working.put(it, null)
+                PublicationDetailExtractionContext context = new PublicationDetailExtractionContext()
+                context.comesFromDatabase = false
+                context.publication = null
+                publication_objects_in_working.put(it, context)
             }
             publication_objects_in_working
         }
@@ -669,8 +673,10 @@ class SubmissionService {
             // initialise the map of publication type objects would be added to the model
             def publication_objects_in_working = initialisePublicationMap()
             if (rev.model.publication) {
-                publication_objects_in_working.put(rev.model.publication.linkProvider.linkType,
-                    rev.model.publication)
+                PublicationDetailExtractionContext context = new PublicationDetailExtractionContext()
+                context.comesFromDatabase = true
+                context.publication = rev.model.publication
+                publication_objects_in_working.put(rev.model.publication.linkProvider.linkType, context)
             }
             workingMemory.put("publication_objects_in_working", publication_objects_in_working)
             sessionFactory.currentSession.clear()
