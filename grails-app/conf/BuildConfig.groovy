@@ -81,7 +81,7 @@ grails.project.dependency.resolution = {
         runtime "postgresql:postgresql:9.1-901.jdbc4"
 
         //using the latest groovy eclipse compiler 2.9.2-01
-        compile "net.biomodels.jummp:AnnotationStore:0.2.8-SNAPSHOT"
+        compile "net.biomodels.jummp:AnnotationStore:0.2.9-SNAPSHOT"
         compile("org.apache.solr:solr-solrj:4.10.1") {
             excludes 'wstx-asl', //a newer version of woodstox comes with jsbml
                 // httpcomponents 4.3.1 is incompatible with 4.2, which breaks jena-arq
