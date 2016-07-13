@@ -132,6 +132,13 @@ class RevisionTransportCommand implements Serializable {
         return validationReport.split("     ");
     }*/
 
+    String getCertificationMessage(){
+        if(qcInfo){
+            return qcInfo.comment
+        }else
+            return "This model is not certified."
+    }
+
     String getValidationLevelMessage(){
         getValidationLevelMessage(validationLevel)
     }

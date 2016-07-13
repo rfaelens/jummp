@@ -251,7 +251,8 @@ class ModelController {
                         showPublishOption: showPublishOption,
                         canSubmitForPublication: canSubmitForPublication,
                         canCertify: canCertify,
-                        validationLevel: rev.getValidationLevelMessage()
+                        validationLevel: rev.getValidationLevelMessage(),
+                        certComment:rev.getCertificationMessage()
             ]
             if (rev.id == modelDelegateService.getLatestRevision(PERENNIAL_ID).id) {
                 flash.genericModel = model

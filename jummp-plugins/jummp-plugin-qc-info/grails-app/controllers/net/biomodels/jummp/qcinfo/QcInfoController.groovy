@@ -33,8 +33,17 @@ class QcInfoController {
     }
 
     def certify() {
+        if(params.comment == "" ){
+            render([status: '500', message: "Please add a comment."] as JSON)
+            return
+        }
+        if(params.flag == "" ){
+            render([status: '500', message: "Please select a certification level."] as JSON)
+            return
+        }
+
         boolean certified = false
-        FlagLevel flag = FlagLevel.FLAG_1
+        FlagLevel flag;
         if (params.flag == "1") {
             flag = FlagLevel.FLAG_1
         }
@@ -43,7 +52,11 @@ class QcInfoController {
         }
         else if (params.flag == "3") {
             flag = FlagLevel.FLAG_3
+        }else{
+            render([status: '500', message: "Invalid certification level."] as JSON)
+            return
         }
+
         def qcInfo = qcInfoService.createQcInfo(flag, params.comment)
         if (qcInfo != null) {
             certified = modelDelegateService.addQcInfo(params.revision, qcInfo)
