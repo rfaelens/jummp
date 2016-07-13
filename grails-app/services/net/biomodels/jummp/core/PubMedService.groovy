@@ -32,16 +32,11 @@ package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.model.Publication
-import net.biomodels.jummp.model.PublicationPerson
 import net.biomodels.jummp.model.PublicationLinkProvider
-import org.springframework.validation.ObjectError
 import org.xml.sax.SAXParseException
 import org.springframework.transaction.annotation.Transactional
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.plugins.security.Person
-import java.util.regex.Pattern
-import java.util.regex.Matcher
-import net.biomodels.jummp.core.adapters.PublicationLinkProviderAdapter
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 /**
@@ -58,71 +53,6 @@ import org.apache.commons.logging.LogFactory
 class PubMedService {
     final Log log = LogFactory.getLog(getClass())
     static transactional = true
-
-    PublicationTransportCommand getPublication(String id) throws JummpException {
-        Publication publication = Publication.createCriteria().get() {
-            eq("link",id)
-            linkProvider {
-                eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
-            }
-        }
-        if (publication) {
-            return DomainAdapter.getAdapter(publication).toCommandObject();
-        } else {
-            return fetchPublicationData(id)
-        }
-    }
-
-    PublicationTransportCommand getPublication(PublicationTransportCommand cmd) throws JummpException {
-        PublicationLinkProvider.LinkType type =
-                PublicationLinkProvider.LinkType.findLinkTypeByLabel(cmd.linkProvider.linkType)
-        if (type == PublicationLinkProvider.LinkType.PUBMED) {
-            return getPublication(cmd.link)
-        }
-        return null
-    }
-
-    boolean verifyLink(String linkTypeAsString, String link) {
-        def linkProvider = PublicationLinkProvider.LinkType.findLinkTypeByLabel(linkTypeAsString)
-        PublicationLinkProvider pubLinkProvider = PublicationLinkProvider.createCriteria().get() {
-            eq("linkType", linkProvider)
-        }
-        if (!pubLinkProvider) {
-            return false
-        }
-        if (PublicationLinkProvider.LinkType.MANUAL_ENTRY == pubLinkProvider.linkType) {
-            return true
-        }
-        Pattern p = Pattern.compile(pubLinkProvider.pattern);
-        Matcher m = p.matcher(link);
-        return m.matches()
-    }
-
-    public List getPersons(Publication publication) {
-        PublicationPerson.findAllByPublication(publication,
-                    [sort: "position", order: "asc"])
-    }
-
-    public void addPublicationAuthor(Publication publication,
-                                     Person person,
-                                     String realName,
-                                     Integer position) {
-        def tmp = new PublicationPerson(publication: publication,
-                                person: person,
-                                pubAlias: realName,
-                                position: position)
-        if (!tmp.save(flush: true)) {
-            log.error("""\
-Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}""")
-        }
-    }
-
-    public void removePublicationAuthor(Publication publication, Person person) {
-        def tobeDeleted = PublicationPerson.findByPublicationAndPerson(publication, person)
-        if (tobeDeleted) {
-            tobeDeleted.delete()
-        }
-    }
 
     private setFieldIfItExists(String fieldName, PublicationTransportCommand publication, def xmlField, boolean castToInt) {
         try
@@ -206,108 +136,5 @@ Failed to add author $person to $publication: ${tmp.errors.allErrors.inspect()}"
             }
             publication.authors.add(author);
         }
-    }
-
-    private void reconcile(Publication publication, def tobeAdded) {
-        def existing = getPersons(publication)
-        tobeAdded.eachWithIndex { newAuthor, index ->
-            def existingAuthor = existing.find { oldAuthor ->
-                if (newAuthor.id) {
-                    return newAuthor.id == oldAuthor.person.id
-                }
-                else if (newAuthor.orcid) {
-                    return newAuthor.orcid == oldAuthor.person.orcid
-                }
-                return false
-            }
-            if (!existingAuthor) {
-                Person newlyCreatedPubAuthor
-                if (newAuthor.orcid) {
-                    def personWithSameOrcid = Person.findByOrcid(newAuthor.orcid)
-                    if (personWithSameOrcid) {
-                        newlyCreatedPubAuthor = personWithSameOrcid
-                    }
-                }
-                if (!newlyCreatedPubAuthor) {
-                    newlyCreatedPubAuthor = new Person(userRealName: newAuthor.userRealName,
-                                orcid: newAuthor.orcid)
-                    newlyCreatedPubAuthor.save(failOnError: true, flush: true);
-                }
-                try {
-                    addPublicationAuthor(publication, newlyCreatedPubAuthor, newAuthor.userRealName, index)
-                }
-                catch(Exception e) {
-                    e.printStackTrace()
-                }
-            }
-            else {
-                if (existingAuthor.position != index) {
-                    existingAuthor.position = index
-                    existingAuthor.save()
-                }
-            }
-        }
-
-        existing.eachWithIndex{ PublicationPerson author, int index ->
-            // find the authors will be remove out of the publication authors
-            def willBeRemovedAuthor = tobeAdded.find { willBeAddedAuthor ->
-                if (willBeAddedAuthor.id) {
-                    return willBeAddedAuthor.id == author.person.id
-                }
-                else if (willBeAddedAuthor.orcid) {
-                    return willBeAddedAuthor.orcid == author.person.orcid
-                }
-                return false
-            } // return false means the author is not existing in the tobeAdded list
-            if (!willBeRemovedAuthor) {
-                removePublicationAuthor(publication, author.person)
-            }
-        }
-    }
-
-    Publication fromCommandObject(PublicationTransportCommand cmd) {
-        Publication publication = Publication.createCriteria().get() {
-            eq("link",cmd.link)
-            linkProvider {
-                eq("linkType", PublicationLinkProvider.LinkType.findLinkTypeByLabel(cmd.linkProvider.linkType))
-            }
-        }
-        if (publication) {
-            publication.title = cmd.title
-            publication.affiliation = cmd.affiliation
-            publication.synopsis = cmd.synopsis
-            publication.journal = cmd.journal
-            publication.year = cmd.year
-            publication.month = cmd.month
-            publication.day = cmd.day
-            publication.volume = cmd.volume
-            publication.issue = cmd.issue
-            publication.pages = cmd.pages
-            publication.save(flush: true)
-            reconcile(publication, cmd.authors)
-            return publication
-        }
-        Publication publ = new Publication(journal: cmd.journal,
-                title: cmd.title,
-                affiliation: cmd.affiliation,
-                synopsis: cmd.synopsis,
-                year: cmd.year,
-                month: cmd.month,
-                day: cmd.day,
-                volume: cmd.volume,
-                issue: cmd.issue,
-                pages: cmd.pages,
-                linkProvider: PublicationLinkProviderAdapter.fromCommandObject(cmd.linkProvider),
-                link: cmd.link)
-        if (publ.save(flush: true)) {
-            reconcile(publ, cmd.authors)
-        } else {
-            StringBuilder err = new StringBuilder()
-            publ.errors?.allErrors?.each { ObjectError e ->
-                err.append(e.defaultMessage).append('. ')
-            }
-            log.error("Error encountered while saving publication ${publ.dump()}: $err".toString())
-        }
-        return publ
     }
 }

@@ -50,6 +50,12 @@ class JummpTagLib {
         out << body(mainFile: g.message(code: msg))
     }
 
+    def displayModelDescriptionLabel = { attrs, body ->
+        String msg = selectDDMoReAwareMessageCode("submission.summary.descriptionLabel.ddmore",
+                "submission.summary.descriptionLabel")
+        out << body(description: g.message(code: msg))
+    }
+
     def displayExistingMainFile = { attrs ->
         def result = new StringBuilder()
         String mainFileLabel = selectDDMoReAwareMessageCode(

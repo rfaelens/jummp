@@ -620,7 +620,9 @@
         <g:pageProperty name="page.modelspecifictabs" />
     </ul>
       <div id="Overview">
-          <span class="bold">Model Description:</span>
+          <jummp:displayModelDescriptionLabel>
+              <span class="bold">${description}:</span>
+          </jummp:displayModelDescriptionLabel>
           <div style="margin-left: 30px;">
               ${revision.description}
           </div>
