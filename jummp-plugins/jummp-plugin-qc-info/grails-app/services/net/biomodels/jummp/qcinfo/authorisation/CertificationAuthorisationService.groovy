@@ -1,6 +1,6 @@
 package net.biomodels.jummp.qcinfo.authorisation
 
-import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugins.springsecurity.SpringSecurityUtils
 
 /**
  * Created by tnguyen on 25/07/16.
