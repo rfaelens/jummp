@@ -88,7 +88,7 @@ class TeamController {
     	flash.message = "Could not find that team. Please select one from the list below."
         redirect(action: 'index')
     }
-    
+
     /**
      * Lists the teams belonging to the current user.
      */
@@ -170,7 +170,7 @@ class TeamController {
     				Set<User> removeThese = existingUsers - users;
     				removeThese.each {
     					UserTeam userTeam = UserTeam.findByUserAndTeam(it, team)
-    					userTeam.delete();
+    					userTeam.remove(it, team, true)
     				}
     				render team.id
     			}
