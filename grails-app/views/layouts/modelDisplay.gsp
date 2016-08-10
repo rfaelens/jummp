@@ -40,7 +40,7 @@
 <head>
         <title>${revision.name}</title>
         <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness"
-                                                 file="jquery-ui-1.10.3.custom.css"/>" />
+                                                 file="jquery-ui-1.10.3.custom.min.css"/>" />
 
     <script type="text/x-mathjax-config">
         MathJax.Hub.Config({
@@ -48,7 +48,7 @@
         });
     </script>
     <script type='text/javascript'
-            src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'>
+            src="${grailsApplication.config.grails.serverURL}/js/MathJax-2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
     </script>
         <g:javascript src="jstree/jquery.jstree.js"/>
         <g:javascript src="equalize.js"/>
