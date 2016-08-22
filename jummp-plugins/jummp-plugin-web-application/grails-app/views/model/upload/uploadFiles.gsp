@@ -51,9 +51,9 @@
     <body>
         <g:if test="${showProceedAsUnknownFormat}">
           <div id="dialog-confirm" title="Model Format Error">
-            <p>The model was detected as ${modelFormatDetectedAs} but is not a
-            supported version. You can proceed with the submission but the model
-            will be stored as an unknown model. Would you like to proceed?</p>
+            <p>The model seems to be written in a version of ${modelFormatDetectedAs} that is not
+            supported. You can proceed with the submission, but the format of the
+            model will be labelled as original code. Would you like to proceed?</p>
           </div>
         </g:if>
         <g:if test ="${showProceedWithoutValidationDialog}">
